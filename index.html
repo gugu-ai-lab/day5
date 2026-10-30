@@ -106,7 +106,6 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
 <main class="wrap">
   <div class="mapbox">
     <div class="map-ui">
-      <button class="pill" id="b3d">3D 시점</button>
       <button class="pill" id="breset">처음 위치</button>
     </div>
     <div id="map"></div>
@@ -144,22 +143,21 @@ const state = {q:"", cat:"", d1:"", sort:"name"};
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const COLOR = {"민속":"#0f766e"}; const EXT = "#d9622b";
 const BOUNDS = [[126.12,33.17],[126.98,33.58]];
-const HOME = {pitch:55, bearing:-12};
 
 /* ---------- 3D 지도 (MapLibre + 무료 지형/지도 타일, API 키 없음) ---------- */
-let map = null, mapReady = false, is3d = true;
+let map = null, mapReady = false;
 function initMap(){
   if(typeof maplibregl === "undefined"){ $("map").style.display = "none"; $("mapfb").style.display = "block"; document.querySelector(".map-ui").style.display = "none"; return; }
   const dem = {type:"raster-dem", encoding:"terrarium", tileSize:256, maxzoom:14,
     tiles:["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
     attribution:"Terrain: Mapzen/AWS"};
   map = new maplibregl.Map({
-    container:"map", bounds:BOUNDS, fitBoundsOptions:{padding:30, pitch:55, bearing:-12}, pitch:55, bearing:-12, maxPitch:75,
+    container:"map", bounds:BOUNDS, fitBoundsOptions:{padding:30}, pitch:0, bearing:0, maxPitch:75,
     style:{version:8, sources:{
       osm:{type:"raster", tileSize:256, maxzoom:19, tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution:"© OpenStreetMap contributors"},
       dem, hill:dem},
       layers:[{id:"osm", type:"raster", source:"osm"},
-              {id:"hill", type:"hillshade", source:"hill", paint:{"hillshade-exaggeration":.45}}]}
+              {id:"hill", type:"hillshade", source:"hill", paint:{"hillshade-exaggeration":.6}}]}
   });
   map.addControl(new maplibregl.NavigationControl({visualizePitch:true}), "top-right");
   map.on("load", () => {
@@ -179,9 +177,8 @@ function initMap(){
 }
 const geo = list => ({type:"FeatureCollection", features:list.map(d => ({type:"Feature",
   geometry:{type:"Point", coordinates:[d.lng,d.lat]}, properties:{id:d.id, name:d.name, cat:d.cat}}))});
-function flyTo(d){ if(!map) return; map.flyTo({center:[d.lng,d.lat], zoom:13, pitch:is3d?60:0, speed:.9}); }
-$("b3d").onclick = () => { is3d = !is3d; map.easeTo({pitch:is3d?55:0, bearing:is3d?-12:0}); map.setTerrain(is3d ? {source:"dem", exaggeration:1.6} : null); $("b3d").textContent = is3d ? "3D 시점" : "평면 보기"; };
-$("breset").onclick = () => map && map.fitBounds(BOUNDS, {padding:30, pitch:is3d?55:0, bearing:is3d?-12:0});
+function flyTo(d){ if(!map) return; map.flyTo({center:[d.lng,d.lat], zoom:13, pitch:0, speed:.9}); }
+$("breset").onclick = () => map && map.fitBounds(BOUNDS, {padding:30, pitch:0, bearing:0});
 
 /* ---------- 목록 ---------- */
 function setup(){
