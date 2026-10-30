@@ -12,7 +12,7 @@
   --shadow:0 1px 2px rgba(20,40,40,.06),0 8px 24px rgba(20,40,40,.07);
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;line-height:1.6}
 .wrap{max-width:1180px;margin:0 auto;padding:0 18px}
 
@@ -253,8 +253,8 @@ function openDetail(id){
   const sm = $("seemap"); if(sm) sm.onclick = () => { $("dlg").close(); $("map").scrollIntoView({behavior:"smooth", block:"center"}); flyTo(d); };
   $("dlg").showModal(); $("dlg").scrollTop = 0;
 }
-$("totop").onclick = () => window.scrollTo({top:0, behavior:"smooth"});
-$("tobottom").onclick = () => window.scrollTo({top:document.documentElement.scrollHeight, behavior:"smooth"});
+$("totop").onclick = () => window.scrollTo({top:0, behavior:"instant"});
+$("tobottom").onclick = () => window.scrollTo({top:document.documentElement.scrollHeight, behavior:"instant"});
 $("dx").onclick = () => $("dlg").close();
 $("dlg").onclick = e => { if(e.target === $("dlg")) $("dlg").close(); };
 
