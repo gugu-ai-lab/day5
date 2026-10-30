@@ -87,7 +87,8 @@ dialog::backdrop{background:rgba(10,30,30,.55);backdrop-filter:blur(2px)}
 .btn.sub{background:var(--chip);color:var(--ink)}
 footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
 .jump{position:fixed;right:16px;bottom:24px;z-index:30;display:flex;flex-direction:column;gap:8px}
-.jump button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.95);color:var(--teal-d);font-size:18px;cursor:pointer;box-shadow:0 4px 14px rgba(20,40,40,.18);font-family:inherit;line-height:1}
+.jump button{width:58px;padding:9px 0 8px;border-radius:29px;border:1px solid var(--line);background:rgba(255,255,255,.96);color:var(--teal-d);cursor:pointer;box-shadow:0 4px 14px rgba(20,40,40,.18);font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;line-height:1.1}
+.jump svg{width:22px;height:22px;stroke:currentColor;stroke-width:3.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .jump button:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
 @media(max-width:600px){.hero{padding:44px 0 80px}.stat{min-width:80px;padding:8px 14px}.stat b{font-size:22px}}
 </style>
@@ -133,8 +134,8 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
 <footer>출처: 제주특별자치도 제주역사문화 일반정보·위치정보 (공공데이터포털 오픈API) · 지도 © OpenStreetMap 기여자</footer>
 
 <div class="jump">
-  <button id="totop" aria-label="맨 위로" title="맨 위로">↑</button>
-  <button id="tobottom" aria-label="맨 아래로" title="맨 아래로">↓</button>
+  <button id="totop" aria-label="맨 위로" title="맨 위로"><span>맨위로</span><svg viewBox="0 0 24 24"><path d="M12 21V4M5 11l7-7 7 7"/></svg></button>
+  <button id="tobottom" aria-label="맨 아래로" title="맨 아래로"><svg viewBox="0 0 24 24"><path d="M12 3v17M5 13l7 7 7-7"/></svg><span>맨밑으로</span></button>
 </div>
 
 <dialog id="dlg">
