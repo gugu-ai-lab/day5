@@ -18,7 +18,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"A
 
 /* hero */
 .hero{position:relative;color:#fff;padding:64px 0 130px;overflow:hidden;
-  background:radial-gradient(900px 400px at 85% -10%,rgba(255,196,120,.35),transparent 60%),linear-gradient(140deg,#0f766e 0%,#0b4f5c 55%,#12394a 100%)}
+  background:linear-gradient(140deg,#0f766e 0%,#0b4f5c 55%,#12394a 100%)}
+.hero::before{content:"";position:absolute;right:11%;top:36px;width:clamp(70px,10vw,120px);aspect-ratio:1;border-radius:50%;background:#ffd36e;box-shadow:0 0 0 14px rgba(255,211,110,.16)}
+.hero .wrap{position:relative;z-index:1}
 .hills{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:clamp(70px,11vw,130px);display:block}
 .eyebrow{font-size:13px;letter-spacing:.14em;opacity:.8;text-transform:uppercase}
 .hero h1{margin:6px 0 10px;font-size:clamp(30px,5vw,48px);line-height:1.2;letter-spacing:-.02em}
