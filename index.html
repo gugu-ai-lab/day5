@@ -194,25 +194,30 @@ function renderChips(){
   $("chips").innerHTML = ["", ...cats].map(c => `<button class="chip ${state.cat === c ? "on" : ""}" data-c="${esc(c)}">${c || "전체"}</button>`).join("");
 }
 function renderRegions(){
-  const n = r => DATA.filter(d => regionOf(d) === r).length;
-  $("rchips").innerHTML = [["","전체 지역"], ...REGIONS.map(r => [r, `${r} ${n(r)}`])].map(([v,l]) =>
+  const base = DATA.filter(d => matches(d, false));
+  const n = r => base.filter(d => regionOf(d) === r).length;
+  $("rchips").innerHTML = [["",`전체 지역 ${base.length}`], ...REGIONS.map(r => [r, `${r} ${n(r)}`])].map(([v,l]) =>
     `<button class="chip ${state.region === v ? "on" : ""}" data-r="${v}">${l}</button>`).join("");
 }
-$("rchips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.region = b.dataset.r; renderRegions(); render(); };
+$("rchips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.region = b.dataset.r; render(); };
 $("chips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.cat = b.dataset.c; renderChips(); render(); };
 $("q").oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); };
 $("d1").onchange = e => { state.d1 = e.target.value; render(); };
 $("sort").onchange = e => { state.sort = e.target.value; render(); };
 
+function matches(d, withRegion = true){
+  return (!state.cat || d.cat === state.cat) && (!state.d1 || d.d1 === state.d1) && (!withRegion || !state.region || regionOf(d) === state.region) &&
+    (!state.q || [d.name,d.title,d.addr,d.sub,d.tags.join(" ")].join(" ").toLowerCase().includes(state.q));
+}
 function filtered(){
-  const r = DATA.filter(d => (!state.cat || d.cat === state.cat) && (!state.d1 || d.d1 === state.d1) && (!state.region || regionOf(d) === state.region) &&
-    (!state.q || [d.name,d.title,d.addr,d.sub,d.tags.join(" ")].join(" ").toLowerCase().includes(state.q)));
+  const r = DATA.filter(d => matches(d));
   const s = {name:(a,b)=>a.name.localeCompare(b.name,"ko"), date:(a,b)=>(b.date||"").localeCompare(a.date||"")}[state.sort];
   return r.sort(s);
 }
 function render(){
   const list = filtered();
   $("count").textContent = `${list.length}곳`;
+  renderRegions();
   if(mapReady) map.getSource("places").setData(geo(list));
   $("grid").innerHTML = list.length ? list.map(d => `
     <button class="card ${d.cat==="민속"?"":"ext"}" data-id="${d.id}">
