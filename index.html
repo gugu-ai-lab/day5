@@ -119,10 +119,10 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
     <select id="sort">
       <option value="name">이름순</option>
       <option value="date">발행일 최신순</option>
-      <option value="lat">북 → 남</option>
     </select>
     <div class="chips" id="chips"></div>
-  </div></div>
+  </div>
+  <div class="chips" id="rchips" style="margin-top:10px"></div></div>
 
   <div class="count" id="count"></div>
   <div class="grid" id="grid"></div>
@@ -139,7 +139,9 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
 let DATA = [];
 let cats = [];
 const $ = id => document.getElementById(id);
-const state = {q:"", cat:"", d1:"", sort:"name"};
+const state = {q:"", cat:"", d1:"", region:"", sort:"name"};
+const REGIONS = ["제주시","서귀포시"];
+const regionOf = d => d.addr.includes("서귀포시") ? "서귀포시" : d.addr.includes("제주시") ? "제주시" : "";
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const COLOR = {"민속":"#0f766e"}; const EXT = "#d9622b";
 const BOUNDS = [[126.12,33.17],[126.98,33.58]];
@@ -191,15 +193,21 @@ function setup(){
 function renderChips(){
   $("chips").innerHTML = ["", ...cats].map(c => `<button class="chip ${state.cat === c ? "on" : ""}" data-c="${esc(c)}">${c || "전체"}</button>`).join("");
 }
+function renderRegions(){
+  const n = r => DATA.filter(d => regionOf(d) === r).length;
+  $("rchips").innerHTML = [["","전체 지역"], ...REGIONS.map(r => [r, `${r} ${n(r)}`])].map(([v,l]) =>
+    `<button class="chip ${state.region === v ? "on" : ""}" data-r="${v}">${l}</button>`).join("");
+}
+$("rchips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.region = b.dataset.r; renderRegions(); render(); };
 $("chips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.cat = b.dataset.c; renderChips(); render(); };
 $("q").oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); };
 $("d1").onchange = e => { state.d1 = e.target.value; render(); };
 $("sort").onchange = e => { state.sort = e.target.value; render(); };
 
 function filtered(){
-  const r = DATA.filter(d => (!state.cat || d.cat === state.cat) && (!state.d1 || d.d1 === state.d1) &&
+  const r = DATA.filter(d => (!state.cat || d.cat === state.cat) && (!state.d1 || d.d1 === state.d1) && (!state.region || regionOf(d) === state.region) &&
     (!state.q || [d.name,d.title,d.addr,d.sub,d.tags.join(" ")].join(" ").toLowerCase().includes(state.q)));
-  const s = {name:(a,b)=>a.name.localeCompare(b.name,"ko"), date:(a,b)=>(b.date||"").localeCompare(a.date||""), lat:(a,b)=>b.lat-a.lat}[state.sort];
+  const s = {name:(a,b)=>a.name.localeCompare(b.name,"ko"), date:(a,b)=>(b.date||"").localeCompare(a.date||"")}[state.sort];
   return r.sort(s);
 }
 function render(){
@@ -241,7 +249,7 @@ $("count").textContent = "데이터를 불러오는 중…";
 $("grid").innerHTML = '<div class="skel"></div>'.repeat(6);
 fetch("/api/places")
   .then(r => r.json().then(j => { if(!r.ok) throw new Error(j.error || r.status); return j; }))
-  .then(data => { DATA = data; setup(); renderChips(); render(); })
+  .then(data => { DATA = data; setup(); renderChips(); renderRegions(); render(); })
   .catch(e => {
     $("count").textContent = "";
     $("grid").innerHTML = `<div class="empty">데이터를 불러오지 못했습니다.<br><small>${esc(e.message)}</small></div>`;
