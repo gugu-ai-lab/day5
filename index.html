@@ -17,10 +17,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"A
 .wrap{max-width:1180px;margin:0 auto;padding:0 18px}
 
 /* hero */
-.hero{position:relative;color:#fff;padding:64px 0 90px;overflow:hidden;
+.hero{position:relative;color:#fff;padding:64px 0 130px;overflow:hidden;
   background:radial-gradient(900px 400px at 85% -10%,rgba(255,196,120,.35),transparent 60%),linear-gradient(140deg,#0f766e 0%,#0b4f5c 55%,#12394a 100%)}
-.hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:70px;
-  background:var(--bg);clip-path:polygon(0 70%,12% 45%,25% 62%,40% 20%,50% 0,60% 22%,75% 58%,88% 42%,100% 65%,100% 100%,0 100%)}
+.hills{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:clamp(70px,11vw,130px);display:block}
 .eyebrow{font-size:13px;letter-spacing:.14em;opacity:.8;text-transform:uppercase}
 .hero h1{margin:6px 0 10px;font-size:clamp(30px,5vw,48px);line-height:1.2;letter-spacing:-.02em}
 .hero p{margin:0;max-width:560px;opacity:.88;font-size:16px}
@@ -29,7 +28,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"A
 .stat b{display:block;font-size:26px;line-height:1.2}
 
 /* map */
-.mapbox{position:relative;margin-top:-56px;z-index:2;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#dfe9e6;border:1px solid var(--line)}
+.mapbox{position:relative;margin-top:-34px;z-index:2;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#dfe9e6;border:1px solid var(--line)}
 #map{height:min(62vh,560px);min-height:340px}
 .map-ui{position:absolute;left:12px;top:12px;display:flex;gap:8px;z-index:3}
 .pill{border:0;background:rgba(255,255,255,.94);border-radius:99px;padding:7px 14px;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);color:var(--ink);font-family:inherit}
@@ -94,7 +93,13 @@ footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
   <h1>제주 역사문화 탐방</h1>
   <p>신화와 전설, 의례와 마을 이야기까지. 제주특별자치도 공공데이터 120곳을 지도와 함께 둘러보세요.</p>
   <div class="stats" id="stats"></div>
-</div></section>
+</div>
+  <svg class="hills" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#f4f1ea" fill-opacity=".28" d="M0 100C150 60 260 82 380 56C500 30 600 72 720 42C840 12 900 52 1020 64C1140 76 1260 42 1440 72L1440 121L0 121Z"/>
+    <path fill="#f4f1ea" fill-opacity=".55" d="M0 110C200 102 380 96 520 82C600 72 645 50 690 38C715 33 765 33 790 38C835 50 880 72 960 82C1100 96 1280 102 1440 110L1440 121L0 121Z"/>
+    <path fill="#f4f1ea" d="M0 113C80 97 160 97 240 110C320 122 380 101 460 99C560 97 600 115 700 115C800 115 860 97 960 99C1060 101 1120 119 1220 109C1320 99 1380 101 1440 111L1440 121L0 121Z"/>
+  </svg>
+</section>
 
 <main class="wrap">
   <div class="mapbox">
