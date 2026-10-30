@@ -4,100 +4,188 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>제주 역사문화 탐방</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
 <style>
-:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2a2e;--mute:#667276;--line:#e3ded3;--accent:#0d7a6b;--accent2:#c2571a;--chip:#ebe7dc}
+:root{
+  --bg:#f4f1ea;--card:#fff;--ink:#1c2a2e;--mute:#6a7679;--line:#e4dfd3;
+  --teal:#0f766e;--teal-d:#0b4f5c;--folk:#0f766e;--ext:#d9622b;--chip:#ece8dc;
+  --shadow:0 1px 2px rgba(20,40,40,.06),0 8px 24px rgba(20,40,40,.07);
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6}
-header{background:linear-gradient(135deg,#0d7a6b,#17495a);color:#fff;padding:36px 20px 28px}
-.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
-header h1{margin:0 0 6px;font-size:28px}
-header p{margin:0;opacity:.85}
-.stats{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.stat{background:rgba(255,255,255,.14);border-radius:10px;padding:8px 14px;font-size:14px}
-.stat b{font-size:18px;margin-right:4px}
-.controls{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 8px}
-input[type=search],select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff;color:var(--ink)}
-input[type=search]{flex:1;min-width:200px}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
-.chip{border:0;background:var(--chip);padding:6px 14px;border-radius:99px;cursor:pointer;font-size:14px;color:var(--ink)}
-.chip.on{background:var(--accent);color:#fff}
-.count{color:var(--mute);font-size:14px;margin-bottom:10px}
-.map{background:#e8f1ee;border:1px solid var(--line);border-radius:14px;margin-bottom:18px;padding:8px}
-.map svg{width:100%;max-width:760px;margin:0 auto;height:auto;display:block}
-.dot{cursor:pointer;stroke:#fff;stroke-width:1.5}
-.dot:hover{r:8}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding-bottom:50px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:6px;text-align:left;font:inherit;color:inherit}
-.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
-.card .name{font-size:18px;font-weight:700}
-.card .ttl{font-size:14px;color:var(--mute)}
-.card .addr{font-size:13px;color:var(--mute)}
-.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:#d9efea;color:#0a5e52;margin-right:4px}
-.badge.alt{background:#f8e3d5;color:#9a4212}
-.empty{text-align:center;color:var(--mute);padding:50px 0}
-dialog{border:0;border-radius:16px;max-width:720px;width:92vw;max-height:88vh;padding:0;color:var(--ink)}
-dialog::backdrop{background:rgba(0,0,0,.45)}
-.dhead{position:sticky;top:0;background:#fff;padding:18px 22px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
-.dhead h2{margin:0;font-size:22px}
-.x{border:0;background:var(--chip);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer}
-.dbody{padding:16px 22px 24px}
-.dbody h3{font-size:15px;margin:18px 0 4px;color:var(--accent)}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+
+/* hero */
+.hero{position:relative;color:#fff;padding:64px 0 90px;overflow:hidden;
+  background:radial-gradient(900px 400px at 85% -10%,rgba(255,196,120,.35),transparent 60%),linear-gradient(140deg,#0f766e 0%,#0b4f5c 55%,#12394a 100%)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:70px;
+  background:var(--bg);clip-path:polygon(0 70%,12% 45%,25% 62%,40% 20%,50% 0,60% 22%,75% 58%,88% 42%,100% 65%,100% 100%,0 100%)}
+.eyebrow{font-size:13px;letter-spacing:.14em;opacity:.8;text-transform:uppercase}
+.hero h1{margin:6px 0 10px;font-size:clamp(30px,5vw,48px);line-height:1.2;letter-spacing:-.02em}
+.hero p{margin:0;max-width:560px;opacity:.88;font-size:16px}
+.stats{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.14);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:10px 18px;font-size:14px;min-width:96px}
+.stat b{display:block;font-size:26px;line-height:1.2}
+
+/* map */
+.mapbox{position:relative;margin-top:-56px;z-index:2;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:#dfe9e6;border:1px solid var(--line)}
+#map{height:min(62vh,560px);min-height:340px}
+.map-ui{position:absolute;left:12px;top:12px;display:flex;gap:8px;z-index:3}
+.pill{border:0;background:rgba(255,255,255,.94);border-radius:99px;padding:7px 14px;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);color:var(--ink);font-family:inherit}
+.pill:hover{background:#fff}
+.legend{position:absolute;right:12px;bottom:12px;background:rgba(255,255,255,.94);border-radius:12px;padding:8px 12px;font-size:12.5px;z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin:0 5px 0 0;vertical-align:-1px}
+.map-fallback{display:none;padding:60px 20px;text-align:center;color:var(--mute)}
+.maplibregl-popup-content{font-family:inherit;font-weight:600;padding:6px 10px;border-radius:8px}
+
+/* controls */
+.bar{position:sticky;top:0;z-index:20;background:rgba(244,241,234,.92);backdrop-filter:blur(8px);margin-top:22px;padding:12px 0;border-bottom:1px solid var(--line)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:220px;position:relative}
+.search input{width:100%;padding:11px 14px 11px 40px;border:1px solid var(--line);border-radius:12px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
+.search span{position:absolute;left:14px;top:9px;opacity:.5}
+select{padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit}
+input:focus,select:focus{outline:2px solid var(--teal);outline-offset:1px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;padding:8px 16px;border-radius:99px;cursor:pointer;font-size:14px;color:var(--ink);font-family:inherit}
+.chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.count{color:var(--mute);font-size:14px;margin:18px 0 12px}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding-bottom:60px}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px 22px;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;display:flex;flex-direction:column;gap:7px;text-align:left;font:inherit;color:inherit;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--folk)}
+.card.ext::before{background:var(--ext)}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card .name{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.card .ttl{font-size:14px;color:var(--ink);opacity:.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .addr{font-size:12.5px;color:var(--mute);margin-top:auto;padding-top:4px}
+.badge{display:inline-block;font-size:12px;padding:2px 10px;border-radius:99px;background:#d7efe9;color:#0a5e55;margin:0 4px 0 0}
+.badge.ext{background:#fbe2d3;color:#a2430f}
+.badge.g{background:var(--chip);color:#555}
+.empty{grid-column:1/-1;text-align:center;color:var(--mute);padding:60px 0}
+.skel{height:130px;border-radius:16px;background:linear-gradient(90deg,#ebe7dc 25%,#f5f2ea 50%,#ebe7dc 75%);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+
+/* dialog */
+dialog{border:0;border-radius:20px;max-width:740px;width:92vw;max-height:88vh;padding:0;color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog::backdrop{background:rgba(10,30,30,.55);backdrop-filter:blur(2px)}
+.dhead{position:sticky;top:0;background:#fff;padding:20px 24px 12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.dhead h2{margin:0;font-size:24px;letter-spacing:-.01em}
+.x{border:0;background:var(--chip);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;flex:none}
+.dbody{padding:16px 24px 26px}
+.dbody h3{font-size:14px;margin:20px 0 4px;color:var(--teal)}
+.dbody h3.t{font-size:18px;color:var(--ink);margin-top:10px}
 .dbody p{margin:0;white-space:pre-wrap;word-break:keep-all}
 .meta{font-size:14px;color:var(--mute)}
-.tag{display:inline-block;background:var(--chip);border-radius:6px;padding:1px 8px;font-size:13px;margin:2px 3px 2px 0}
-a.btn{display:inline-block;margin-top:16px;background:var(--accent);color:#fff;padding:9px 16px;border-radius:10px;text-decoration:none;font-size:14px}
-footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 30px}
+.tag{display:inline-block;background:var(--chip);border-radius:8px;padding:1px 9px;font-size:13px;margin:2px 4px 2px 0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.btn{display:inline-block;background:var(--teal);color:#fff;padding:10px 18px;border-radius:12px;text-decoration:none;font-size:14px;border:0;cursor:pointer;font-family:inherit}
+.btn.sub{background:var(--chip);color:var(--ink)}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 36px}
+@media(max-width:600px){.hero{padding:44px 0 80px}.stat{min-width:80px;padding:8px 14px}.stat b{font-size:22px}}
 </style>
 </head>
 <body>
-<header><div class="wrap">
-  <h1>🌋 제주 역사문화 탐방</h1>
-  <p>제주특별자치도 제주역사문화 공공데이터 (공공데이터포털 오픈API)</p>
+<section class="hero"><div class="wrap">
+  <div class="eyebrow">Jeju Heritage Atlas</div>
+  <h1>제주 역사문화 탐방</h1>
+  <p>신화와 전설, 의례와 마을 이야기까지. 제주특별자치도 공공데이터 120곳을 지도와 함께 둘러보세요.</p>
   <div class="stats" id="stats"></div>
-</div></header>
+</div></section>
 
 <main class="wrap">
-  <div class="controls">
-    <input type="search" id="q" placeholder="장소명, 제목, 주소, 키워드 검색">
+  <div class="mapbox">
+    <div class="map-ui">
+      <button class="pill" id="b3d">3D 시점</button>
+      <button class="pill" id="breset">처음 위치</button>
+    </div>
+    <div id="map"></div>
+    <div class="legend"><span><i style="background:var(--folk)"></i>민속</span> &nbsp; <span><i style="background:var(--ext)"></i>확장분야</span></div>
+    <div class="map-fallback" id="mapfb">지도를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요. (아래 목록은 정상 사용 가능합니다)</div>
+  </div>
+
+  <div class="bar"><div class="controls">
+    <div class="search"><span>🔎</span><input type="search" id="q" placeholder="장소명, 제목, 주소, 키워드 검색"></div>
     <select id="d1"><option value="">전체 디렉토리</option></select>
     <select id="sort">
       <option value="name">이름순</option>
       <option value="date">발행일 최신순</option>
       <option value="lat">북 → 남</option>
     </select>
-  </div>
-  <div class="chips" id="chips"></div>
+    <div class="chips" id="chips"></div>
+  </div></div>
+
   <div class="count" id="count"></div>
-  <div class="map"><svg id="map" viewBox="0 0 670 470" role="img" aria-label="제주 지도 위 장소 분포"></svg></div>
   <div class="grid" id="grid"></div>
 </main>
-<footer>출처: 제주특별자치도 제주역사문화 일반정보·위치정보</footer>
+<footer>출처: 제주특별자치도 제주역사문화 일반정보·위치정보 (공공데이터포털 오픈API) · 지도 © OpenStreetMap 기여자</footer>
 
 <dialog id="dlg">
   <div class="dhead"><h2 id="dt"></h2><button class="x" id="dx" aria-label="닫기">✕</button></div>
   <div class="dbody" id="db"></div>
 </dialog>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
 <script>
 let DATA = [];
 let cats = [];
-
 const $ = id => document.getElementById(id);
 const state = {q:"", cat:"", d1:"", sort:"name"};
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const COLOR = {"민속":"#0f766e"}; const EXT = "#d9622b";
+const BOUNDS = [[126.12,33.17],[126.98,33.58]];
+const HOME = {pitch:55, bearing:-12};
 
-// 상단 통계 + 필터 UI (API로 데이터를 받은 뒤 한 번 실행)
+/* ---------- 3D 지도 (MapLibre + 무료 지형/지도 타일, API 키 없음) ---------- */
+let map = null, mapReady = false, is3d = true;
+function initMap(){
+  if(typeof maplibregl === "undefined"){ $("map").style.display = "none"; $("mapfb").style.display = "block"; document.querySelector(".map-ui").style.display = "none"; return; }
+  const dem = {type:"raster-dem", encoding:"terrarium", tileSize:256, maxzoom:14,
+    tiles:["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
+    attribution:"Terrain: Mapzen/AWS"};
+  map = new maplibregl.Map({
+    container:"map", bounds:BOUNDS, fitBoundsOptions:{padding:30, pitch:55, bearing:-12}, pitch:55, bearing:-12, maxPitch:75,
+    style:{version:8, sources:{
+      osm:{type:"raster", tileSize:256, maxzoom:19, tiles:["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution:"© OpenStreetMap contributors"},
+      dem, hill:dem},
+      layers:[{id:"osm", type:"raster", source:"osm"},
+              {id:"hill", type:"hillshade", source:"hill", paint:{"hillshade-exaggeration":.45}}]}
+  });
+  map.addControl(new maplibregl.NavigationControl({visualizePitch:true}), "top-right");
+  map.on("load", () => {
+    map.setTerrain({source:"dem", exaggeration:1.6});
+    map.addSource("places", {type:"geojson", data:geo([])});
+    map.addLayer({id:"pts", type:"circle", source:"places", paint:{
+      "circle-radius":["interpolate",["linear"],["zoom"],8,5,13,10],
+      "circle-color":["case",["==",["get","cat"],"민속"],"#0f766e",EXT],
+      "circle-stroke-color":"#fff","circle-stroke-width":2}});
+    const pop = new maplibregl.Popup({closeButton:false, closeOnClick:false, offset:12});
+    map.on("mouseenter","pts",e => { map.getCanvas().style.cursor="pointer"; pop.setLngLat(e.features[0].geometry.coordinates).setText(e.features[0].properties.name).addTo(map); });
+    map.on("mouseleave","pts",() => { map.getCanvas().style.cursor=""; pop.remove(); });
+    map.on("click","pts",e => openDetail(+e.features[0].properties.id));
+    mapReady = true; render();
+  });
+  map.on("error", e => { if(!mapReady && !map.loaded()) {/* 타일 오류는 무시, 점/목록은 계속 동작 */} });
+}
+const geo = list => ({type:"FeatureCollection", features:list.map(d => ({type:"Feature",
+  geometry:{type:"Point", coordinates:[d.lng,d.lat]}, properties:{id:d.id, name:d.name, cat:d.cat}}))});
+function flyTo(d){ if(!map) return; map.flyTo({center:[d.lng,d.lat], zoom:13, pitch:is3d?60:0, speed:.9}); }
+$("b3d").onclick = () => { is3d = !is3d; map.easeTo({pitch:is3d?55:0, bearing:is3d?-12:0}); map.setTerrain(is3d ? {source:"dem", exaggeration:1.6} : null); $("b3d").textContent = is3d ? "3D 시점" : "평면 보기"; };
+$("breset").onclick = () => map && map.fitBounds(BOUNDS, {padding:30, pitch:is3d?55:0, bearing:is3d?-12:0});
+
+/* ---------- 목록 ---------- */
 function setup(){
   cats = [...new Set(DATA.map(d => d.cat))];
   const d1s = [...new Set(DATA.map(d => d.d1).filter(Boolean))].sort();
-  $("stats").innerHTML =
-    `<div class="stat"><b>${DATA.length}</b>장소</div>` +
+  $("stats").innerHTML = `<div class="stat"><b>${DATA.length}</b>전체 장소</div>` +
     cats.map(c => `<div class="stat"><b>${DATA.filter(d => d.cat === c).length}</b>${esc(c)}</div>`).join("");
   $("d1").innerHTML += d1s.map(v => `<option>${esc(v)}</option>`).join("");
 }
 function renderChips(){
-  $("chips").innerHTML = ["", ...cats].map(c =>
-    `<button class="chip ${state.cat === c ? "on" : ""}" data-c="${esc(c)}">${c || "전체"}</button>`).join("");
+  $("chips").innerHTML = ["", ...cats].map(c => `<button class="chip ${state.cat === c ? "on" : ""}" data-c="${esc(c)}">${c || "전체"}</button>`).join("");
 }
 $("chips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.cat = b.dataset.c; renderChips(); render(); };
 $("q").oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); };
@@ -105,39 +193,19 @@ $("d1").onchange = e => { state.d1 = e.target.value; render(); };
 $("sort").onchange = e => { state.sort = e.target.value; render(); };
 
 function filtered(){
-  let r = DATA.filter(d =>
-    (!state.cat || d.cat === state.cat) &&
-    (!state.d1 || d.d1 === state.d1) &&
-    (!state.q || [d.name, d.title, d.addr, d.sub, d.tags.join(" ")].join(" ").toLowerCase().includes(state.q)));
+  const r = DATA.filter(d => (!state.cat || d.cat === state.cat) && (!state.d1 || d.d1 === state.d1) &&
+    (!state.q || [d.name,d.title,d.addr,d.sub,d.tags.join(" ")].join(" ").toLowerCase().includes(state.q)));
   const s = {name:(a,b)=>a.name.localeCompare(b.name,"ko"), date:(a,b)=>(b.date||"").localeCompare(a.date||""), lat:(a,b)=>b.lat-a.lat}[state.sort];
   return r.sort(s);
 }
-
-// 지도: 외부 지도 없이 제주도 대략적인 해안선(SVG)을 직접 그리고 그 위에 좌표를 찍음
-const K = 900, X0 = 126.12, Y0 = 33.60, COS = 0.834;
-const px = d => 10 + (d.lng - X0) * K * COS, py = d => 10 + (Y0 - d.lat) * K;
-const COAST = [[126.47,33.515],[126.52,33.525],[126.56,33.527],[126.60,33.535],[126.65,33.553],[126.70,33.55],[126.76,33.56],[126.81,33.545],[126.86,33.535],[126.91,33.515],[126.94,33.47],[126.93,33.44],[126.90,33.40],[126.88,33.36],[126.84,33.32],[126.79,33.29],[126.72,33.27],[126.65,33.255],[126.58,33.245],[126.52,33.235],[126.47,33.23],[126.41,33.235],[126.36,33.24],[126.31,33.225],[126.26,33.205],[126.21,33.21],[126.17,33.235],[126.16,33.28],[126.16,33.32],[126.18,33.35],[126.22,33.39],[126.27,33.42],[126.31,33.46],[126.36,33.49],[126.42,33.50]];
-const P = (lng, lat) => px({lng}).toFixed(1) + "," + py({lat}).toFixed(1);
-const island = `<polygon points="${COAST.map(c => P(c[0], c[1])).join(" ")}" fill="#f3efe0" stroke="#7a9a92" stroke-width="2" stroke-linejoin="round"/>`;
-const labels = [["한라산",126.533,33.362],["제주시",126.53,33.47],["서귀포시",126.56,33.27]].map(([t,lng,lat]) => {
-  const [x,y] = P(lng,lat).split(",");
-  return (t==="한라산" ? `<polygon points="${x-7},${+y+5} ${x},${y-8} ${+x+7},${+y+5}" fill="#8a7a5a"/>` : "") +
-    `<text x="${x}" y="${+y+(t==="한라산"?20:0)}" text-anchor="middle" font-size="13" fill="#5b6a66" pointer-events="none">${t}</text>`;
-}).join("");
-function renderMap(list){
-  $("map").innerHTML = island + labels + list.map(d =>
-    `<circle class="dot" data-id="${d.id}" cx="${px(d).toFixed(1)}" cy="${py(d).toFixed(1)}" r="5.5" fill="${d.cat==="민속" ? "#0d7a6b" : "#c2571a"}"><title>${esc(d.name)}</title></circle>`).join("");
-}
-$("map").onclick = e => { const c = e.target.closest(".dot"); if(c) openDetail(+c.dataset.id); };
-
 function render(){
   const list = filtered();
-  $("count").textContent = `${list.length}곳 표시 중 · 지도의 점: 초록=민속, 주황=확장분야`;
-  renderMap(list);
+  $("count").textContent = `${list.length}곳`;
+  if(mapReady) map.getSource("places").setData(geo(list));
   $("grid").innerHTML = list.length ? list.map(d => `
-    <button class="card" data-id="${d.id}">
+    <button class="card ${d.cat==="민속"?"":"ext"}" data-id="${d.id}">
       <div class="name">${esc(d.name)}</div>
-      <div><span class="badge ${d.cat==="민속"?"":"alt"}">${esc(d.cat)}</span>${d.d1?`<span class="badge">${esc(d.d1)}${d.d2?" · "+esc(d.d2):""}</span>`:""}</div>
+      <div><span class="badge ${d.cat==="민속"?"":"ext"}">${esc(d.cat)}</span>${d.d1?`<span class="badge g">${esc(d.d1)}${d.d2?" · "+esc(d.d2):""}</span>`:""}</div>
       <div class="ttl">${esc(d.title)}</div>
       <div class="addr">📍 ${esc(d.addr || "주소 정보 없음")}</div>
     </button>`).join("") : `<div class="empty">검색 결과가 없습니다.</div>`;
@@ -150,21 +218,23 @@ function openDetail(id){
   const sec = (h, t) => t ? `<h3>${h}</h3><p>${esc(t)}</p>` : "";
   $("db").innerHTML =
     `<div class="meta">${esc(d.cat)}${d.d1?" › "+esc(d.d1):""}${d.d2?" › "+esc(d.d2):""}</div>` +
-    `<h3>${esc(d.title)}</h3>` + (d.sub ? `<p class="meta">${esc(d.sub)}</p>` : "") +
+    `<h3 class="t">${esc(d.title)}</h3>` + (d.sub ? `<p class="meta">${esc(d.sub)}</p>` : "") +
     sec("주소", d.addr ? `${d.addr}${d.zip?" ("+d.zip+")":""}` : "") +
-    sec("좌표", `위도 ${d.lat}, 경도 ${d.lng}`) +
-    sec("초록", d.abstract) + sec("내용", d.content) +
+    sec("좌표", `위도 ${d.lat}, 경도 ${d.lng}`) + sec("초록", d.abstract) + sec("내용", d.content) +
     `<h3>정보</h3><p class="meta">${[d.author&&"저작자: "+d.author, d.date&&"발행일: "+d.date, d.type&&"자료유형: "+d.type].filter(Boolean).map(esc).join(" · ")}</p>` +
-    (d.tags.length ? `<div style="margin-top:8px">${d.tags.map(t=>`<span class="tag">#${esc(t.trim())}</span>`).join("")}</div>` : "") +
-    (d.url ? `<a class="btn" href="${esc(d.url)}" target="_blank" rel="noopener">제주도 사이트에서 자세히 보기 ↗</a>` : "");
-  $("dlg").showModal();
-  $("dlg").scrollTop = 0;
+    (d.tags.length ? `<div style="margin-top:8px">${d.tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join("")}</div>` : "") +
+    `<div class="actions">${map ? `<button class="btn" id="seemap">지도에서 보기</button>` : ""}` +
+    (d.url ? `<a class="btn sub" href="${esc(d.url)}" target="_blank" rel="noopener">제주도 사이트 ↗</a>` : "") + `</div>`;
+  const sm = $("seemap"); if(sm) sm.onclick = () => { $("dlg").close(); $("map").scrollIntoView({behavior:"smooth", block:"center"}); flyTo(d); };
+  $("dlg").showModal(); $("dlg").scrollTop = 0;
 }
 $("dx").onclick = () => $("dlg").close();
 $("dlg").onclick = e => { if(e.target === $("dlg")) $("dlg").close(); };
 
-// API 호출: 키는 서버(Vercel 환경변수)에만 있고, 화면은 /api/places만 부른다.
+/* ---------- 시작: 서버(Vercel 함수)의 /api/places 호출 ---------- */
+initMap();
 $("count").textContent = "데이터를 불러오는 중…";
+$("grid").innerHTML = '<div class="skel"></div>'.repeat(6);
 fetch("/api/places")
   .then(r => r.json().then(j => { if(!r.ok) throw new Error(j.error || r.status); return j; }))
   .then(data => { DATA = data; setup(); renderChips(); render(); })
