@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>제주 역사문화 탐방</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1f2a2e;--mute:#667276;--line:#e3ded3;--accent:#0d7a6b;--accent2:#c2571a;--chip:#ebe7dc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;line-height:1.6}
+header{background:linear-gradient(135deg,#0d7a6b,#17495a);color:#fff;padding:36px 20px 28px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header h1{margin:0 0 6px;font-size:28px}
+header p{margin:0;opacity:.85}
+.stats{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.14);border-radius:10px;padding:8px 14px;font-size:14px}
+.stat b{font-size:18px;margin-right:4px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 8px}
+input[type=search],select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:#fff;color:var(--ink)}
+input[type=search]{flex:1;min-width:200px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.chip{border:0;background:var(--chip);padding:6px 14px;border-radius:99px;cursor:pointer;font-size:14px;color:var(--ink)}
+.chip.on{background:var(--accent);color:#fff}
+.count{color:var(--mute);font-size:14px;margin-bottom:10px}
+.map{background:#e8f1ee;border:1px solid var(--line);border-radius:14px;margin-bottom:18px;padding:8px}
+.map svg{width:100%;max-width:760px;margin:0 auto;height:auto;display:block}
+.dot{cursor:pointer;stroke:#fff;stroke-width:1.5}
+.dot:hover{r:8}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding-bottom:50px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:6px;text-align:left;font:inherit;color:inherit}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.card .name{font-size:18px;font-weight:700}
+.card .ttl{font-size:14px;color:var(--mute)}
+.card .addr{font-size:13px;color:var(--mute)}
+.badge{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:#d9efea;color:#0a5e52;margin-right:4px}
+.badge.alt{background:#f8e3d5;color:#9a4212}
+.empty{text-align:center;color:var(--mute);padding:50px 0}
+dialog{border:0;border-radius:16px;max-width:720px;width:92vw;max-height:88vh;padding:0;color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dhead{position:sticky;top:0;background:#fff;padding:18px 22px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.dhead h2{margin:0;font-size:22px}
+.x{border:0;background:var(--chip);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer}
+.dbody{padding:16px 22px 24px}
+.dbody h3{font-size:15px;margin:18px 0 4px;color:var(--accent)}
+.dbody p{margin:0;white-space:pre-wrap;word-break:keep-all}
+.meta{font-size:14px;color:var(--mute)}
+.tag{display:inline-block;background:var(--chip);border-radius:6px;padding:1px 8px;font-size:13px;margin:2px 3px 2px 0}
+a.btn{display:inline-block;margin-top:16px;background:var(--accent);color:#fff;padding:9px 16px;border-radius:10px;text-decoration:none;font-size:14px}
+footer{text-align:center;color:var(--mute);font-size:13px;padding:0 0 30px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>🌋 제주 역사문화 탐방</h1>
+  <p>제주특별자치도 제주역사문화 공공데이터 (공공데이터포털 오픈API)</p>
+  <div class="stats" id="stats"></div>
+</div></header>
+
+<main class="wrap">
+  <div class="controls">
+    <input type="search" id="q" placeholder="장소명, 제목, 주소, 키워드 검색">
+    <select id="d1"><option value="">전체 디렉토리</option></select>
+    <select id="sort">
+      <option value="name">이름순</option>
+      <option value="date">발행일 최신순</option>
+      <option value="lat">북 → 남</option>
+    </select>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="count" id="count"></div>
+  <div class="map"><svg id="map" viewBox="0 0 670 470" role="img" aria-label="제주 지도 위 장소 분포"></svg></div>
+  <div class="grid" id="grid"></div>
+</main>
+<footer>출처: 제주특별자치도 제주역사문화 일반정보·위치정보</footer>
+
+<dialog id="dlg">
+  <div class="dhead"><h2 id="dt"></h2><button class="x" id="dx" aria-label="닫기">✕</button></div>
+  <div class="dbody" id="db"></div>
+</dialog>
+
+<script>
+let DATA = [];
+let cats = [];
+
+const $ = id => document.getElementById(id);
+const state = {q:"", cat:"", d1:"", sort:"name"};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+// 상단 통계 + 필터 UI (API로 데이터를 받은 뒤 한 번 실행)
+function setup(){
+  cats = [...new Set(DATA.map(d => d.cat))];
+  const d1s = [...new Set(DATA.map(d => d.d1).filter(Boolean))].sort();
+  $("stats").innerHTML =
+    `<div class="stat"><b>${DATA.length}</b>장소</div>` +
+    cats.map(c => `<div class="stat"><b>${DATA.filter(d => d.cat === c).length}</b>${esc(c)}</div>`).join("");
+  $("d1").innerHTML += d1s.map(v => `<option>${esc(v)}</option>`).join("");
+}
+function renderChips(){
+  $("chips").innerHTML = ["", ...cats].map(c =>
+    `<button class="chip ${state.cat === c ? "on" : ""}" data-c="${esc(c)}">${c || "전체"}</button>`).join("");
+}
+$("chips").onclick = e => { const b = e.target.closest(".chip"); if(!b) return; state.cat = b.dataset.c; renderChips(); render(); };
+$("q").oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); };
+$("d1").onchange = e => { state.d1 = e.target.value; render(); };
+$("sort").onchange = e => { state.sort = e.target.value; render(); };
+
+function filtered(){
+  let r = DATA.filter(d =>
+    (!state.cat || d.cat === state.cat) &&
+    (!state.d1 || d.d1 === state.d1) &&
+    (!state.q || [d.name, d.title, d.addr, d.sub, d.tags.join(" ")].join(" ").toLowerCase().includes(state.q)));
+  const s = {name:(a,b)=>a.name.localeCompare(b.name,"ko"), date:(a,b)=>(b.date||"").localeCompare(a.date||""), lat:(a,b)=>b.lat-a.lat}[state.sort];
+  return r.sort(s);
+}
+
+// 지도: 외부 지도 없이 제주도 대략적인 해안선(SVG)을 직접 그리고 그 위에 좌표를 찍음
+const K = 900, X0 = 126.12, Y0 = 33.60, COS = 0.834;
+const px = d => 10 + (d.lng - X0) * K * COS, py = d => 10 + (Y0 - d.lat) * K;
+const COAST = [[126.47,33.515],[126.52,33.525],[126.56,33.527],[126.60,33.535],[126.65,33.553],[126.70,33.55],[126.76,33.56],[126.81,33.545],[126.86,33.535],[126.91,33.515],[126.94,33.47],[126.93,33.44],[126.90,33.40],[126.88,33.36],[126.84,33.32],[126.79,33.29],[126.72,33.27],[126.65,33.255],[126.58,33.245],[126.52,33.235],[126.47,33.23],[126.41,33.235],[126.36,33.24],[126.31,33.225],[126.26,33.205],[126.21,33.21],[126.17,33.235],[126.16,33.28],[126.16,33.32],[126.18,33.35],[126.22,33.39],[126.27,33.42],[126.31,33.46],[126.36,33.49],[126.42,33.50]];
+const P = (lng, lat) => px({lng}).toFixed(1) + "," + py({lat}).toFixed(1);
+const island = `<polygon points="${COAST.map(c => P(c[0], c[1])).join(" ")}" fill="#f3efe0" stroke="#7a9a92" stroke-width="2" stroke-linejoin="round"/>`;
+const labels = [["한라산",126.533,33.362],["제주시",126.53,33.47],["서귀포시",126.56,33.27]].map(([t,lng,lat]) => {
+  const [x,y] = P(lng,lat).split(",");
+  return (t==="한라산" ? `<polygon points="${x-7},${+y+5} ${x},${y-8} ${+x+7},${+y+5}" fill="#8a7a5a"/>` : "") +
+    `<text x="${x}" y="${+y+(t==="한라산"?20:0)}" text-anchor="middle" font-size="13" fill="#5b6a66" pointer-events="none">${t}</text>`;
+}).join("");
+function renderMap(list){
+  $("map").innerHTML = island + labels + list.map(d =>
+    `<circle class="dot" data-id="${d.id}" cx="${px(d).toFixed(1)}" cy="${py(d).toFixed(1)}" r="5.5" fill="${d.cat==="민속" ? "#0d7a6b" : "#c2571a"}"><title>${esc(d.name)}</title></circle>`).join("");
+}
+$("map").onclick = e => { const c = e.target.closest(".dot"); if(c) openDetail(+c.dataset.id); };
+
+function render(){
+  const list = filtered();
+  $("count").textContent = `${list.length}곳 표시 중 · 지도의 점: 초록=민속, 주황=확장분야`;
+  renderMap(list);
+  $("grid").innerHTML = list.length ? list.map(d => `
+    <button class="card" data-id="${d.id}">
+      <div class="name">${esc(d.name)}</div>
+      <div><span class="badge ${d.cat==="민속"?"":"alt"}">${esc(d.cat)}</span>${d.d1?`<span class="badge">${esc(d.d1)}${d.d2?" · "+esc(d.d2):""}</span>`:""}</div>
+      <div class="ttl">${esc(d.title)}</div>
+      <div class="addr">📍 ${esc(d.addr || "주소 정보 없음")}</div>
+    </button>`).join("") : `<div class="empty">검색 결과가 없습니다.</div>`;
+}
+$("grid").onclick = e => { const c = e.target.closest(".card"); if(c) openDetail(+c.dataset.id); };
+
+function openDetail(id){
+  const d = DATA.find(x => x.id === id);
+  $("dt").textContent = d.name;
+  const sec = (h, t) => t ? `<h3>${h}</h3><p>${esc(t)}</p>` : "";
+  $("db").innerHTML =
+    `<div class="meta">${esc(d.cat)}${d.d1?" › "+esc(d.d1):""}${d.d2?" › "+esc(d.d2):""}</div>` +
+    `<h3>${esc(d.title)}</h3>` + (d.sub ? `<p class="meta">${esc(d.sub)}</p>` : "") +
+    sec("주소", d.addr ? `${d.addr}${d.zip?" ("+d.zip+")":""}` : "") +
+    sec("좌표", `위도 ${d.lat}, 경도 ${d.lng}`) +
+    sec("초록", d.abstract) + sec("내용", d.content) +
+    `<h3>정보</h3><p class="meta">${[d.author&&"저작자: "+d.author, d.date&&"발행일: "+d.date, d.type&&"자료유형: "+d.type].filter(Boolean).map(esc).join(" · ")}</p>` +
+    (d.tags.length ? `<div style="margin-top:8px">${d.tags.map(t=>`<span class="tag">#${esc(t.trim())}</span>`).join("")}</div>` : "") +
+    (d.url ? `<a class="btn" href="${esc(d.url)}" target="_blank" rel="noopener">제주도 사이트에서 자세히 보기 ↗</a>` : "");
+  $("dlg").showModal();
+  $("dlg").scrollTop = 0;
+}
+$("dx").onclick = () => $("dlg").close();
+$("dlg").onclick = e => { if(e.target === $("dlg")) $("dlg").close(); };
+
+// API 호출: 키는 서버(Vercel 환경변수)에만 있고, 화면은 /api/places만 부른다.
+$("count").textContent = "데이터를 불러오는 중…";
+fetch("/api/places")
+  .then(r => r.json().then(j => { if(!r.ok) throw new Error(j.error || r.status); return j; }))
+  .then(data => { DATA = data; setup(); renderChips(); render(); })
+  .catch(e => {
+    $("count").textContent = "";
+    $("grid").innerHTML = `<div class="empty">데이터를 불러오지 못했습니다.<br><small>${esc(e.message)}</small></div>`;
+  });
+</script>
+</body>
+</html>
