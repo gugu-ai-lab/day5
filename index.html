@@ -154,6 +154,7 @@ const regionOf = d => d.addr.includes("서귀포시") ? "서귀포시" : d.addr.
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const COLOR = {"민속":"#0f766e"}; const EXT = "#d9622b";
 const BOUNDS = [[126.12,33.17],[126.98,33.58]];
+const LIMIT = [[125.75,32.95],[127.35,33.85]]; // 제주도 주변까지만 이동 가능
 
 /* ---------- 3D 지도 (MapLibre + 무료 지형/지도 타일, API 키 없음) ---------- */
 let map = null, mapReady = false;
@@ -172,6 +173,8 @@ function initMap(){
   });
   map.addControl(new maplibregl.NavigationControl({visualizePitch:true}), "top-right");
   map.on("load", () => {
+    map.setMinZoom(Math.max(5, map.getZoom() - 0.8)); // 너무 멀리 축소 못 하게
+    map.setMaxBounds(LIMIT);
     map.setTerrain({source:"dem", exaggeration:1.6});
     map.addSource("places", {type:"geojson", data:geo([])});
     map.addLayer({id:"pts", type:"circle", source:"places", paint:{
